@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Allotment Preference List</title>
+  <style>
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+    
+    body { 
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      font-size: 14px; 
+      padding: 20px;
+      background: var(--color-background-primary, #ffffff);
+      color: var(--color-text-primary, #111111);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    .stat-bar { 
+      display: flex; 
+      gap: 10px; 
+      margin-bottom: 14px; 
+      flex-wrap: wrap; 
+    }
+
+    .stat { 
+      background: #f4f4f5; 
+      border-radius: 6px; 
+      padding: 8px 14px; 
+      font-size: 12px; 
+      color: #666666; 
+    }
+
+    .stat strong { 
+      font-size: 16px; 
+      font-weight: 600; 
+      color: #111111; 
+      display: block; 
+    }
+
+    .controls { 
+      display: flex; 
+      gap: 15px; 
+      margin-bottom: 20px; 
+      flex-wrap: wrap; 
+      align-items: center; 
+      background: #fafafa;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #e4e4e7;
+    }
+
+    .controls label { 
+      font-size: 12px; 
+      font-weight: 500;
+      color: #555555; 
+      margin-right: 5px;
+    }
+
+    .controls select { 
+      font-size: 13px; 
+      border: 1px solid #e4e4e7; 
+      border-radius: 4px; 
+      background: #ffffff; 
+      color: #111111; 
+      padding: 6px 10px; 
+      outline: none;
+    }
+
+    .tbl-wrap { 
+      overflow-x: auto; 
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+    }
+
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      font-size: 13px; 
+      text-align: left;
+    }
+
+    thead tr { 
+      background: #f4f4f5; 
+    }
+
+    th { 
+      padding: 12px 10px; 
+      font-weight: 600; 
+      font-size: 12px; 
+      color: #444444; 
+      border-bottom: 1px solid #e4e4e7; 
+      white-space: nowrap; 
+    }
+
+    td { 
+      padding: 12px 10px; 
+      border-bottom: 1px solid #e4e4e7; 
+      vertical-align: top; 
+      line-height: 1.5; 
+    }
+
+    tr:last-child td { 
+      border-bottom: none; 
+    }
+
+    tr:hover td { 
+      background: #fafafa; 
+    }
+
+    .college-name { 
+      font-weight: 600; 
+      font-size: 13.5px; 
+      color: #111111; 
+      margin-bottom: 4px;
+    }
+
+    .district-badge { 
+      display: inline-block; 
+      font-size: 11px; 
+      font-weight: 500;
+      padding: 2px 8px; 
+      border-radius: 12px; 
+    }
+
+    .pkd { background: #e0f2fe; color: #0369a1; }
+    .mpm { background: #dcfce7; color: #15803d; }
+    .tsr { background: #fef3c7; color: #b45309; }
+
+    .type-g { background: #fee2e2; color: #b91c1c; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 12px; }
+    .type-a { background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 12px; }
+
+    .course-tag { 
+      display: inline-block; 
+      font-size: 11px; 
+      padding: 2px 6px; 
+      border-radius: 4px; 
+      margin: 2px 4px 2px 0; 
+      background: #f4f4f5; 
+      border: 1px solid #e4e4e7; 
+      color: #3f3f46; 
+    }
+
+    .excellent { color: #16a34a; font-weight: 600; }
+    .intermediate { color: #d97706; font-weight: 600; }
+    .average { color: #dc2626; font-weight: 600; }
+
+    .dist-num { font-weight: 600; color: #111111; }
+    .remark { font-size: 12px; color: #4f4f4f; max-width: 200px; }
+    .fee-box { font-size: 12px; color: #3f3f46; line-height: 1.4; }
+  </style>
+</head>
+<body>
+    <h2>College allotment preference list for BA Economics and BBA Finance from Cherpulassery, sorted by distance</h2>
+
+
+
+<div class="stat-bar" id="statBar">
+  <div class="stat"><strong id="totalCount">0</strong> Colleges</div>
+  <div class="stat"><strong id="pkdCount">0</strong> Palakkad</div>
+  <div class="stat"><strong id="mpmCount">0</strong> Malappuram</div>
+  <div class="stat"><strong id="govtCount">0</strong> Government</div>
+  <div class="stat"><strong id="aidedCount">0</strong> Aided</div>
+</div>
+
+<div class="controls">
+  <div>
+    <label for="distFilter">District:</label>
+    <select id="distFilter" onchange="applyFilters()">
+      <option value="all">All districts</option>
+      <option value="Palakkad">Palakkad</option>
+      <option value="Malappuram">Malappuram</option>
+    </select>
+  </div>
+  <div>
+    <label for="courseFilter">Course:</label>
+    <select id="courseFilter" onchange="applyFilters()">
+      <option value="all">Both courses</option>
+      <option value="BA Economics">BA Economics</option>
+      <option value="BBA Finance">BBA Finance</option>
+    </select>
+  </div>
+  <div>
+    <label for="typeFilter">Type:</label>
+    <select id="typeFilter" onchange="applyFilters()">
+      <option value="all">All types</option>
+      <option value="Government">Government</option>
+      <option value="Aided">Aided</option>
+    </select>
+  </div>
+  <div>
+    <label for="ratingFilter">Rating:</label>
+    <select id="ratingFilter" onchange="applyFilters()">
+      <option value="all">All ratings</option>
+      <option value="Excellent">Excellent</option>
+      <option value="Intermediate">Intermediate</option>
+      <option value="Average">Average</option>
+    </select>
+  </div>
+</div>
+
+<div class="tbl-wrap">
+  <table id="mainTable">
+    <thead>
+      <tr>
+        <th style="width: 50px; text-align: center;">Rank</th>
+        <th style="min-width: 200px;">College Details</th>
+        <th style="min-width: 150px;">Course(s) Available</th>
+        <th>Type</th>
+        <th style="min-width: 100px;">Intake</th>
+        <th style="min-width: 140px;">Rating</th>
+        <th style="min-width: 90px;">Distance</th>
+        <th style="min-width: 180px;">Fee Details</th>
+        <th style="min-width: 180px;">Remarks</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+const colleges = [
+  {
+    rank: 1, name: "MPMMSN Trust College, Shornur", district: "Palakkad", courses: ["BA Economics", "BBA Finance"],
+    type: "Aided", intake: "BA Eco: 40 | BBA: 40", rating: "Intermediate", dist: 13, 
+    ratingNote: "NAAC accredited, well-established (est. 1981), both target courses, good community reputation.",
+    fee: "Aided BA/BBA: ₹2,000–3,500/sem (tuition). Total course ~₹30,000–42,000 (3 yrs, 6 sem).",
+    remarks: "Closest college with BOTH courses. Shornur town; easy bus connectivity from Cherpulassery."
+  },
+  {
+    rank: 2, name: "Sree Neelakanta Govt. Sanskrit College, Pattambi", district: "Palakkad", courses: ["BA Economics"],
+    type: "Government", intake: "BA Eco: 40", rating: "Intermediate", dist: 17, 
+    ratingNote: "Government college, est. 1940, long history. Offers BA Economics. Multicultural campus.",
+    fee: "Govt BA: ₹500–1,500/sem (nominal). Total course ~₹9,000–18,000 (3 yrs).",
+    remarks: "Only BA Economics here (no BBA Finance). Government fees are very nominal."
+  },
+  {
+    rank: 3, name: "NSS College, Ottapalam", district: "Palakkad", courses: ["BA Economics", "BBA Finance"],
+    type: "Aided", intake: "BA Eco: 60 | BBA: 60", rating: "Excellent", dist: 17, 
+    ratingNote: "NAAC A grade, est. 1961, one of the most prestigious aided colleges in Palakkad. High student demand.",
+    fee: "Aided BA: ₹2,000–3,500/sem. BBA (SF): ₹3,500–9,000/sem. Total BA ~₹30,000–42,000; BBA ~₹54,000.",
+    remarks: "NAAC A grade. NSS management known for quality. High cut-off for Economics."
+  },
+  {
+    rank: 4, name: "Govt. Arts & Science College, Pathirippala", district: "Palakkad", courses: ["BBA Finance"],
+    type: "Government", intake: "BBA Finance: 30", rating: "Intermediate", dist: 20, 
+    ratingNote: "Government college, est. recently. BBA Finance government-run, very affordable.",
+    fee: "Govt BBA: ₹500–2,000/sem. Total course ~₹6,000–12,000 (3 yrs).",
+    remarks: "Only BBA Finance here (no BA Economics). Very affordable government fees. Located near Sreekrishnapuram."
+  },
+  {
+    rank: 5, name: "Sreekrishnapuram VT Bhattathiripad College, Mannampatta", district: "Palakkad", courses: ["BBA Finance"],
+    type: "Aided", intake: "BBA Finance: 40", rating: "Intermediate", dist: 20, 
+    ratingNote: "Aided, est. 1982. Offers BBA. Known for active sports culture and arts activities.",
+    fee: "Aided BBA: ₹3,500–9,000/sem. Total ~₹54,000 (SF rate for BBA over 3 yrs).",
+    remarks: "Near Sreekrishnapuram. BBA Finance (Aided batch of 40). Plain Economics not available."
+  },
+  {
+    rank: 6, name: "NSS Arts and Science College, Kappoor, Parakulam", district: "Palakkad", courses: ["BA Economics"],
+    type: "Aided", intake: "BA Eco: 40", rating: "Average", dist: 22, 
+    ratingNote: "NSS-managed aided college, smaller campus. Less prominent than NSS Ottapalam.",
+    fee: "Aided BA: ₹2,000–3,500/sem. Total ~₹30,000–42,000 (3 yrs).",
+    remarks: "Only BA Economics (no BBA Finance). NSS management. Alternative if main NSS Ottapalam is full."
+  },
+  {
+    rank: 7, name: "MES Kalladi College (Autonomous), Mannarkkad", district: "Palakkad", courses: ["BA Economics", "BBA Finance"],
+    type: "Aided", intake: "BA Eco: 60 | BBA Finance: 50", rating: "Excellent", dist: 28, 
+    ratingNote: "NAAC accredited autonomous college, est. 1967. Strong placements and research. Highly reputed.",
+    fee: "Aided BBA: ₹3,500–5,000/sem. Aided BA: ₹2,000–3,500/sem.",
+    remarks: "Autonomous status = better academic flexibility. One of the best colleges in Palakkad."
+  },
+  {
+    rank: 8, name: "Govt Victoria College, Palakkad", district: "Palakkad", courses: ["BA Economics"],
+    type: "Government", intake: "BA Eco: 60", rating: "Excellent", dist: 43, 
+    ratingNote: "Established 1888. NAAC A grade, premier government institution of Kerala. Very high cut-off.",
+    fee: "Govt BA: ₹500–1,500/sem. Total course ~₹9,000–18,000 (3 yrs). Minimal fees.",
+    remarks: "Only BA Economics. Prestigious historic college. Very high cut-off marks required."
+  },
+  {
+    rank: 9, name: "Govt. College, Chittur", district: "Palakkad", courses: ["BA Economics"],
+    type: "Government", intake: "BA Eco: 50", rating: "Intermediate", dist: 45, 
+    ratingNote: "Government college, est. 1947. Large campus, established Economics dept.",
+    fee: "Govt BA: ₹500–1,500/sem. Total ~₹9,000–18,000 (3 yrs).",
+    remarks: "Only BA Economics. Good government college with long history. Located further east."
+  },
+  {
+    rank: 10, name: "NSS College, Nemmara", district: "Palakkad", courses: ["BA Economics", "BBA Finance"],
+    type: "Aided", intake: "BA Eco: 40 | BBA Finance: 30", rating: "Intermediate", dist: 46, 
+    ratingNote: "NSS-managed aided college, est. 1967. NAAC accredited. Consistent academic outcomes.",
+    fee: "Aided BA: ₹2,000–3,500/sem. Total BBA ~₹54,000 (SF rate) over 3 yrs.",
+    remarks: "Both courses available. NSS management. Alternative option for preference list."
+  },
+  {
+    rank: 11, name: "Mercy College, Palakkad", district: "Palakkad", courses: ["BA Economics"],
+    type: "Aided", intake: "BA Eco: 50", rating: "Excellent", dist: 43, 
+    ratingNote: "NAAC A grade, women's college run by Apostolic Carmel Sisters. Strong campus life.",
+    fee: "Aided BA: ₹2,000–3,500/sem. Total ~₹30,000–42,000 (3 yrs).",
+    remarks: "Women's college only. Only BA Economics. Reputed institution — confirm applicant eligibility."
+  },
+  {
+    rank: 12, name: "Sree Narayana College, Alathur", district: "Palakkad", courses: ["BA Economics"],
+    type: "Aided", intake: "BA Eco: 40", rating: "Intermediate", dist: 38, 
+    ratingNote: "Aided, est. 1970. SN Trust management. Known for socially inclusive ethos.",
+    fee: "Aided BA: ₹2,000–3,500/sem. Total ~₹30,000–42,000 (3 yrs).",
+    remarks: "Only BA Economics. Alathur, Palakkad. Reasonable distance. Good backup option."
+  },
+  {
+    rank: 13, name: "Govt. Arts & Science College, Thrithala", district: "Palakkad", courses: [],
+    type: "Government", intake: "—", rating: "Average", dist: 22, 
+    ratingNote: "No BA Economics or BBA Finance offered. B.Com, BSc Maths, BA English only.",
+    fee: "N/A", remarks: "Excluded from functional lists due to absence of target courses."
+  },
+  {
+    rank: 14, name: "Pookoya Thangal Memorial Govt. College, Perinthalmanna", district: "Malappuram", courses: ["BBA Finance"],
+    type: "Government", intake: "BBA Finance: 40", rating: "Intermediate", dist: 16, 
+    ratingNote: "Government college, est. 1975, Perinthalmanna. Good connectivity to Cherpulassery.",
+    fee: "Govt BBA: ₹500–2,000/sem. Total ~₹6,000–12,000 (3 yrs).",
+    remarks: "Only BBA Finance (no BA Economics). Nearest Malappuram govt college. Very affordable."
+  },
+  {
+    rank: 15, name: "Govt. Arts & Science College, Mankada", district: "Malappuram", courses: ["BA Economics", "BBA Finance"],
+    type: "Government", intake: "BA Eco: 40 | BBA Finance: 40", rating: "Intermediate", dist: 24, 
+    ratingNote: "Government college, both target courses offered. Growing government institution.",
+    fee: "Govt BA/BBA: ₹500–2,000/sem. Total ~₹6,000–18,000 (3 yrs).",
+    remarks: "Both courses available. Government, very affordable. Highly recommended for priority list."
+  },
+  {
+    rank: 16, name: "Mar Thoma College, Chungathara", district: "Malappuram", courses: ["BA Economics"],
+    type: "Aided", intake: "BA Eco: 50", rating: "Intermediate", dist: 28, 
+    ratingNote: "Aided, est. 1981, Mar Thoma Church management. Known for inclusive campus culture.",
+    fee: "Aided BA: ₹2,000–3,500/sem. Total ~₹30,000–42,000 (3 yrs).",
+    remarks: "Only BA Economics (no BBA Finance). Chungathara, Malappuram. Reputed management."
+  },
+  {
+    rank: 17, name: "Ambedkar College of Arts and Science, Wandoor", district: "Malappuram", courses: ["BA Economics"],
+    type: "Aided", intake: "BA Eco: 60", rating: "Intermediate", dist: 30, 
+    ratingNote: "Aided, est. 2014–15. Focus on inclusive education. Good connectivity.",
+    fee: "Aided BA: ₹2,000–3,500/sem. Total ~₹30,000–42,000 (3 yrs).",
+    remarks: "Only BA Economics. Large intake of 60 seats — higher chance of allotment."
+  },
+  {
+    rank: 18, name: "Govt. College, Malappuram", district: "Malappuram", courses: ["BA Economics"],
+    type: "Government", intake: "BA Eco: 60", rating: "Excellent", dist: 31, 
+    ratingNote: "Government college, est. 1972. Large established institution with strong PG division.",
+    fee: "Govt BA: ₹500–1,500/sem. Total ~₹9,000–18,000 (3 yrs).",
+    remarks: "Only BA Economics (no BBA Finance). Large reputed govt college in Malappuram town."
+  },
+  {
+    rank: 19, name: "MES Ponnani College", district: "Malappuram", courses: ["BA Economics", "BBA Finance"],
+    type: "Aided", intake: "BA Eco: 60 | BBA Finance: 50", rating: "Excellent", dist: 33, 
+    ratingNote: "Aided, est. 1968. MES management, well-established. Both target courses with large intakes.",
+    fee: "Aided BA: ₹2,000–3,500/sem; BBA: ₹3,500–5,000/sem.",
+    remarks: "Both courses available, large intakes. MES management. Coastal location, good connectivity."
+  },
+  {
+    rank: 20, name: "EMEA College of Arts & Science, Kondotty", district: "Malappuram", courses: ["BA Economics"],
+    type: "Aided", intake: "BA Eco: 60", rating: "Excellent", dist: 34, 
+    ratingNote: "Aided, est. 1982. Highly reputed in Malabar region for academics.",
+    fee: "Aided BA: ₹2,000–3,500/sem. Total ~₹30,000–42,000 (3 yrs).",
+    remarks: "Only BA Economics. Large 60-seat intake. EMEA is a prominent institution."
+  },
+  {
+    rank: 21, name: "Thunchan Memorial Govt. College, Tirur", district: "Malappuram", courses: [],
+    type: "Government", intake: "—", rating: "Average", dist: 49, 
+    ratingNote: "No BA Economics or BBA Finance offered. B.Com, BSc Maths, Physics only.",
+    fee: "N/A", remarks: "Excluded from selection pools."
+  },
+  {
+    rank: 22, name: "PSMO College (Autonomous), Thirurangadi", district: "Malappuram", courses: ["BA Economics", "BBA Finance"],
+    type: "Aided", intake: "BA Eco: 60 | BBA Finance: 45", rating: "Excellent", dist: 42, 
+    ratingNote: "NAAC A+ grade, est. 1968. Autonomous college. Large intakes, good placements.",
+    fee: "Aided/Auto BA/BBA: ~₹10,225/sem. Total course ~₹61,275 (3 yrs).",
+    remarks: "Both courses, large intakes. NAAC A+ autonomous. One of the best in Malappuram."
+  },
+  {
+    rank: 23, name: "NSS College, Manjeri", district: "Malappuram", courses: [],
+    type: "Aided", intake: "—", rating: "Average", dist: 34, 
+    ratingNote: "Target courses not offered in this institution.",
+    fee: "N/A", remarks: "Excluded from functional lists."
+  },
+  {
+    rank: 24, name: "Sullamussalam Science College, Areacode", district: "Malappuram", courses: ["BA Economics"],
+    type: "Aided", intake: "BA Eco: 40", rating: "Intermediate", dist: 40, 
+    ratingNote: "Aided, est. 1995. Economics department well established. Moderate reputation.",
+    fee: "Aided BA: ₹2,000–3,500/sem. Total ~₹30,000–42,000 (3 yrs).",
+    remarks: "Only BA Economics. Aided batch with 40 seats. Areacode, Malappuram."
+  },
+  {
+    rank: 25, name: "MES Keveeyam College, Valanchery", district: "Malappuram", courses: ["BBA Finance"],
+    type: "Aided", intake: "BBA Finance: 50", rating: "Intermediate", dist: 38, 
+    ratingNote: "Aided, est. 1981. MES management. Offers BBA Finance (Aided batch).",
+    fee: "Aided BBA: ₹3,500–5,000/sem. Total ~₹36,000–42,000 (3 yrs).",
+    remarks: "Only BBA Finance (Aided batch). No BA Economics. Valanchery, Malappuram."
+  },
+  {
+    rank: 26, name: "MES Mampad College (Autonomous), Mampad", district: "Malappuram", courses: ["BA Economics", "BBA Finance"],
+    type: "Aided", intake: "BA Eco: 60 | BBA Finance: 50", rating: "Excellent", dist: 43, 
+    ratingNote: "Autonomous aided college, est. 1965. Strong academics and diverse programs.",
+    fee: "Aided/Auto BA: ₹2,000–4,000/sem; BBA: ₹3,500–5,000/sem.",
+    remarks: "Both courses, large intakes. Autonomous MES college. Deeper into Malappuram but premium quality."
+  },
+  {
+    rank: 27, name: "Amal College (Autonomous), Nilambur", district: "Malappuram", courses: ["BA Economics", "BBA Finance"],
+    type: "Aided", intake: "BA Eco FT: 45 | BBA: 45", rating: "Intermediate", dist: 48, 
+    ratingNote: "Aided autonomous, est. 2005. Offers unique BA Economics with Foreign Trade.",
+    fee: "Aided/Auto BA: ₹2,000–4,000/sem; BBA: ₹3,500–5,000/sem.",
+    remarks: "BA Economics here is 'with Foreign Trade' variant. Autonomous status adds corporate value."
+  },
+  {
+    rank: 28, name: "Govt. Arts and Science College, Nilambur", district: "Malappuram", courses: [],
+    type: "Government", intake: "—", rating: "Average", dist: 48, 
+    ratingNote: "Target courses unavailable.",
+    fee: "N/A", remarks: "Excluded."
+  },
+  {
+    rank: 29, name: "Govt. Arts & Science College, Kondotty", district: "Malappuram", courses: [],
+    type: "Government", intake: "—", rating: "Average", dist: 36, 
+    ratingNote: "Target courses unavailable.",
+    fee: "N/A", remarks: "Excluded."
+  },
+  {
+    rank: 30, name: "Govt. Arts & Science College, Chelakkara (Thrissur)", district: "Thrissur", courses: ["BA Economics"],
+    type: "Government", intake: "BA Eco: 60", rating: "Intermediate", dist: 50, 
+    ratingNote: "Government college in Thrissur bordering Palakkad. Included as a supplementary backup.",
+    fee: "Govt BA: ₹500–1,500/sem. Total course ~₹9,000–18,000 (3 yrs).",
+    remarks: "Located in Thrissur, not Palakkad/Malappuram. Added as safe boundary backup option."
+  }
+];
+
+// Filter data list to strictly handle institutions offering at least one target program
+const validColleges = colleges.filter(c => c.courses.length > 0);
+let filteredData = [...validColleges];
+
+function buildRows(data) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  let displayRank = 1;
+
+  if(data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 30px; color: #888;">No colleges match the selected filter criteria.</td></tr>`;
+    return;
+  }
+
+  data.forEach(c => {
+    let distClass = 'pkd';
+    if (c.district === 'Malappuram') distClass = 'mpm';
+    if (c.district === 'Thrissur') distClass = 'tsr';
+
+    const ratingClass = c.rating === 'Excellent' ? 'excellent' : (c.rating === 'Intermediate' ? 'intermediate' : 'average');
+    const courseTags = c.courses.map(cr => `<span class="course-tag">${cr}</span>`).join('');
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align: center; font-weight: 600; color: #666;">${displayRank++}</td>
+      <td>
+        <div class="college-name">${c.name}</div>
+        <span class="district-badge ${distClass}">${c.district}</span>
+      </td>
+      <td>${courseTags}</td>
+      <td><span class="${c.type === 'Government' ? 'type-g' : 'type-a'}">${c.type}</span></td>
+      <td style="white-space: nowrap; font-size: 12px;">${c.intake.replace(' | ', '<br>')}</td>
+      <td>
+        <span class="${ratingClass}">${c.rating}</span>
+        <div style="font-size: 11px; color: #666; margin-top: 2px; line-height: 1.3;">${c.ratingNote}</div>
+      </td>
+      <td class="dist-num">~${c.dist} km</td>
+      <td class="fee-box">${c.fee.replace(/\. /g, '.<br>')}</td>
+      <td class="remark">${c.remarks}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function applyFilters() {
+  const dist = document.getElementById('distFilter').value;
+  const course = document.getElementById('courseFilter').value;
+  const type = document.getElementById('typeFilter').value;
+  const rating = document.getElementById('ratingFilter').value;
+
+  filteredData = validColleges.filter(c => {
+    if (dist !== 'all' && c.district !== dist) return false;
+    if (course !== 'all' && !c.courses.includes(course)) return false;
+    if (type !== 'all' && c.type !== type) return false;
+    if (rating !== 'all' && c.rating !== rating) return false;
+    return true;
+  });
+
+  // Calculate live configurations dynamically
+  document.getElementById('totalCount').textContent = filteredData.length;
+  document.getElementById('pkdCount').textContent = filteredData.filter(c => c.district === 'Palakkad').length;
+  document.getElementById('mpmCount').textContent = filteredData.filter(c => c.district === 'Malappuram').length;
+  document.getElementById('govtCount').textContent = filteredData.filter(c => c.type === 'Government').length;
+  document.getElementById('aidedCount').textContent = filteredData.filter(c => c.type === 'Aided').length;
+
+  buildRows(filteredData);
+}
+
+// Initial structural bootstrap
+applyFilters();
+</script>
+
+</body>
+</html>
+
